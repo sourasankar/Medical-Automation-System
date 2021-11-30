@@ -33,7 +33,7 @@
             <div class="card-body" >
                 
                 <h5 class="card-title">Required</h5>
-                <div class="">
+                <div style="overflow: auto;">
                     <table class="table table-striped table-bordered">
                       <thead>
                         <tr>

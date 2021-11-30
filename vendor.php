@@ -28,7 +28,7 @@
     
         <div class="row">
             
-            <div class="">
+            <div style="overflow: auto;">
                 <div class="card">
                  <div class="card-body">
                    <h5 class="card-title">Vendors</h5>
@@ -95,10 +95,10 @@
                 </div>
             </div>
             <div class="">
-                <div class="card">
+              <div class="card">
                 <div class="card-body">
                     
-                    <!-- <div class="alert alert-success alert-dismissible fade show col-md-10 text-center mx-auto" style="margin-top: 20px;" role="alert">
+                    <!-- <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
                         <i class="bi bi-check-circle me-1"></i>
                         Employee has been Added successfully
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

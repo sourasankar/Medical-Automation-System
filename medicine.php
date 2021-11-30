@@ -28,37 +28,18 @@
       <div class="row">
         <div class="col-12">
 
-          <!-- <div class="card">
-            <div class="card-body" >
-              <h5 class="card-title">Invoice</h5>
-                <div id="printReceipt">
-                    <div style="display: flex;justify-content: space-evenly;" class="row"> 
-                        <fieldset style="all: revert; font-weight: 600;width: fit-content;" class="col-6">
-                            <legend style="all: revert;">Cash Receipt:</legend>
-                            Receipt No: 54854525515615<br>
-                            Date & Time: 20-Nov-2021 13:45:47<br><br>
-                            <u>Med #Qty @Price</u><br>
-                            Paracetamol 650 #2 @120/-<br>
-                            Paracetamol 650 #2 @120/-<br>
-                            Paracetamol 650 #2 @120/-<br><br>
-                            Total Price: 360/-<br>	                                    
-                        </fieldset>                      
-                    </div>
-                </div>
-                <div class="text-center" style="margin-top: 20px;">
-                    <button type="button" class="btn btn-danger col-2" onclick="printReceipt()">Print</button>
-                </div> 
-            
-              </div>
-
-          </div> -->
-
           <div class="card">
             <div class="card-body" >
+
+               <!-- <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Employee has been Added successfully
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div> -->
               
               <form method="POST" action="#">
                 <h5 class="card-title">Add Supply</h5>
-                <div class="">
+                <div style="overflow: auto;">
                     <table class="table table-striped table-bordered">
                       <thead>
                         <tr>
@@ -90,34 +71,73 @@
                           <td>
                             <input type="date" class="form-control-sm" style="width: 150px;" name="expDateMed1" required>
                           </td>
-                          <td><input onchange="calPrice(this.value,1)" type="number" class="form-control-sm" style="width: 70px;" name="med1" value="1" min=1 required></td>
+                          <td><input onchange="calPrice(this.value,1)" type="number" class="form-control-sm" style="width: 70px;" name="qtyMed1" value="1" min=1 required></td>
                           <td>
                             <input type="number" class="form-control-sm" style="width: 80px;" name="rPriceMed1" required>
                           </td>
                           <td>
                             <input type="number" class="form-control-sm" style="width: 80px;" name="sPriceMed1" required>
                           </td>
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-danger btn-sm" name="delete" value="dsad465ad5"><i class="bi bi-trash"></i></button>
-                              </form>
+                          <td>  
+                            <button type="button" class="btn btn-danger btn-sm" onclick="deleteMed('8456')"><i class="bi bi-trash"></i></button>
                           </td>                         
                         </tr>
                         
                       </tbody>
                     </table>
-                    <div class="align-middle" style="font-weight: 700;display: flex;justify-content: center;align-items: center;">
-                      
-                      <div id="total">Total (Rs): 100/-</div>
-                      <button type="submit" class="btn btn-primary btn-sm" style="margin-left: 25px;" name="generate">Generate</button>
-                      
-                    </div>
                 </div>
-                </form>
+                <div class="align-middle" style="font-weight: 700;display: flex;justify-content: center;align-items: center;"> 
+                  <button type="submit" class="btn btn-primary btn-sm" name="generate">Add Supply</button> 
+                </div>
+              </form>
 
             </div>
 
           </div>
+
+          
+              <div class="card">
+                <div class="card-body">
+                    
+                    <!-- <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Employee has been Added successfully
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div> -->
+                    
+                  <h5 class="card-title">Add New Medicine</h5>
+
+                  <form class="row g-3" method="POST" action="medicine.php">
+                      
+                    <div class="col-md-6">
+                      <label for="medicineName" class="form-label">Medicine Name <span style="color: red;">*</span></label>
+                      <input type="text" class="form-control" id="medicineName" name="medicineName" required> 
+                    </div>
+                    <div class="col-md-6">
+                      <label for="medicineCategory" class="form-label">Category <span style="color: red;">*</span></label>
+                      <input type="text" class="form-control" id="medicineCategory" name="medicineCategory" required> 
+                    </div> 
+                    <div class="col-md-6">
+                      <label for="medicineVendor" class="form-label">Vendor</label>
+                      <select id="medicineVendor" name="medicineVendor" class="form-select" required>
+                        <option value="">Choose...</option>
+                        <option value="4324">Alkem</option>
+                        <option value="43424">Cipla</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="rackLocation" class="form-label">Rack Location <span style="color: red;">*</span></label>
+                      <input type="text" class="form-control" id="rackLocation" name="rackLocation" required>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary" id="addMedicine" name="addMedicine" value="addMedicine">Add Medicine</button>
+                    </div>
+                      
+                </form>
+                  
+                </div>
+              </div>
+            
 
           <div class="card">
             <div class="card-body" >
@@ -132,7 +152,7 @@
                 </div>
                 
                 <h5 class="card-title">Inventory</h5>
-                <div class="">
+                <div style="overflow: auto;">
                     <table class="table table-striped table-bordered">
                       <thead>
                         <tr>
@@ -172,6 +192,18 @@
         </div>        
     
   </main><!-- End #main -->
+
+  <form method="POST" action="#" id="deleteForm">
+    <input type="hidden" name="delete" id="delete">
+  </form>
+
+  <!-- Delete individual item -->
+  <script>
+    function deleteMed(id){
+      document.getElementById("delete").value=id;
+      document.getElementById("deleteForm").submit();
+    }
+  </script>
 
   <!-- Script for Auto Price Calculate -->
   <script>

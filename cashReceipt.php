@@ -58,7 +58,7 @@
               
               <form method="POST" action="#">
                 <h5 class="card-title">Invoice</h5>
-                <div class="">
+                <div style="overflow: auto;">
                     <table class="table table-striped table-bordered">
                       <thead>
                         <tr>
@@ -120,15 +120,13 @@
                           </td>                         
                         </tr>                                              
                       </tbody>
-                    </table>
-                    <div class="align-middle" style="font-weight: 700;display: flex;justify-content: center;align-items: center;">
-                      
-                      <div id="total">Total (Rs): 60/-</div>
-                      <button type="submit" class="btn btn-primary btn-sm" style="margin-left: 25px;" name="generate">Generate</button>
-                      
-                    </div>
+                    </table>                  
                 </div>
-                </form>
+                <div class="align-middle" style="font-weight: 700;display: flex;justify-content: center;align-items: center;">      
+                  <div id="total">Total (Rs): 60/-</div>
+                  <button type="submit" class="btn btn-primary btn-sm" style="margin-left: 25px;" name="generate">Generate</button>    
+                </div>
+              </form>
 
             </div>
 
@@ -147,7 +145,7 @@
                 </div>
                 
                 <h5 class="card-title">Inventory</h5>
-                <div class="">
+                <div style="overflow: auto;">
                     <table class="table table-striped table-bordered">
                       <thead>
                         <tr>

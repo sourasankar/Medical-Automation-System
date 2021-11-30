@@ -38,7 +38,7 @@
       if($row["password"]==$password){
         //Logged IN
         $_SESSION["username"]=$username;
-        $_SESSION["name"]=$row["name"];
+        $_SESSION["empName"]=$row["name"];
         header("Location: dashboard.php");
         die();
       }
@@ -98,7 +98,7 @@
                     </div>
                     <?php }?>                   
 
-                    <form method="POST" action="#" class="row g-3">
+                    <form method="POST" action="login.php" class="row g-3">
 
                     <div class="col-12">
                       <label for="username" class="form-label">Username</label>

@@ -1,3 +1,15 @@
+<?php
+
+	//session start
+	session_start();
+
+  //if not logged in
+  if(!isset($_SESSION["username"])){
+    header("Location: login.php");
+    die();
+  }
+
+?>
 <!DOCTYPE html>
 <html>
 

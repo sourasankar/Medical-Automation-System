@@ -1,3 +1,38 @@
+<?php
+
+	//session start
+	session_start();
+
+  //if not logged in
+  if(!isset($_SESSION["username"])){
+    header("Location: login.php");
+    die();
+  }
+
+  //connection to db
+  require "assets/php/dbConnection.php";
+
+  if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addVendor"])){
+
+    // prepare and bind
+    $stmt = $conn->prepare("INSERT INTO vendor(name,address,phone,email,account_no,ifsc_code) VALUES (?,?,?,?,?,?)");
+    $stmt->bind_param("ssssss",$vendorName,$vendorAddress,$vendorPhone,$vendorEmail,$vendorAcNo,$vendorIfsc);
+
+    //Data from Form
+    $vendorName = $_POST["vendorName"];
+    $vendorAddress = $_POST["vendorAddress"];
+    $vendorPhone = $_POST["vendorPhone"];
+    $vendorEmail = $_POST["vendorEmail"];
+    $vendorAcNo = $_POST["vendorAcNo"];
+    $vendorIfsc = $_POST["vendorIfsc"];
+    $stmt->execute();
+
+    $success = "Vendor details saved successfully";
+
+  }
+
+?>
+
 <!DOCTYPE html>
 <html>
 
@@ -33,7 +68,6 @@
                  <div class="card-body">
                    <h5 class="card-title">Vendors</h5>
 
-                   <!-- Default Table -->
                    <table class="table table-striped table-bordered">
                      <thead>
                        <tr>
@@ -48,61 +82,44 @@
                        </tr>
                      </thead>
                      <tbody>
+                       <?php 
+                          $sql="SELECT * FROM vendor";
+                          $result = $conn->query($sql);
+                          $i=1;
+                          while($row = $result->fetch_assoc()){
+                       ?>
                        <tr class="align-middle">
-                         <th scope="row">1</th>
-                         <td>3213</td>
-                         <td>Alkem</td>
-                         <td>xyz, 784521</td>
-                         <td>9876543210</td>
-                         <td>something@dsa.com</td>  
-                         <td>985642123345</td>
-                         <td>SBIN7894IN</td>
+                         <th scope="row"><?php echo $i; ?></th>
+                         <td><?php echo $row["vendor_id"]; ?></td>
+                         <td><?php echo $row["name"]; ?></td>
+                         <td><?php echo $row["address"]; ?></td>
+                         <td><?php echo $row["phone"]; ?></td>
+                         <td><?php echo $row["email"]; ?></td>  
+                         <td><?php echo $row["account_no"]; ?></td>
+                         <td><?php echo $row["ifsc_code"]; ?></td>
                        </tr>
-                       <tr class="align-middle">
-                         <th scope="row">1</th>
-                         <td>3213</td>
-                         <td>Alkem</td>
-                         <td>xyz, 784521</td>
-                         <td>9876543210</td>
-                         <td>something@dsa.com</td>  
-                         <td>985642123345</td>
-                         <td>SBIN7894IN</td>
-                       </tr>
-                       <tr class="align-middle">
-                         <th scope="row">1</th>
-                         <td>3213</td>
-                         <td>Alkem</td>
-                         <td>xyz, 784521</td>
-                         <td>9876543210</td>
-                         <td>something@dsa.com</td>  
-                         <td>985642123345</td>
-                         <td>SBIN7894IN</td>
-                       </tr>
-                       <tr class="align-middle">
-                         <th scope="row">1</th>
-                         <td>3213</td>
-                         <td>Alkem</td>
-                         <td>xyz, 784521</td>
-                         <td>9876543210</td>
-                         <td>something@dsa.com</td>  
-                         <td>985642123345</td>
-                         <td>SBIN7894IN</td>
-                       </tr>
+                       <?php
+                       $i++;
+                          }
+                       ?>
                      </tbody>
                    </table>
-                   <!-- End Default Table Example -->
+
                  </div>
                 </div>
             </div>
             <div class="">
               <div class="card">
                 <div class="card-body">
-                    
-                    <!-- <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
+                    <?php 
+                        if(isset($success)){  
+                    ?>
+                    <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
                         <i class="bi bi-check-circle me-1"></i>
-                        Employee has been Added successfully
+                        Vendor details saved successfully
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div> -->
+                    </div>
+                    <?php } ?>
                     
                   <h5 class="card-title">Add Vendor</h5>
 
@@ -146,6 +163,10 @@
 
   </main><!-- End #main -->
 
+  <?php 
+    //connection to db close
+    $conn->close();
+  ?>
 
   <?php require "assets/php/footer.php"; ?>
 

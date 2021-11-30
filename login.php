@@ -12,7 +12,7 @@
 	}
 
   //Error Msg
-  $errorMsgnull;
+  $errorMsg=null;
 
   if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])){
 
@@ -103,13 +103,13 @@
                     <div class="col-12">
                       <label for="username" class="form-label">Username</label>
                       <div class="input-group">
-                          <input type="text" name="username" class="form-control" id="username" required>
+                          <input type="text" name="username" class="form-control" id="username" value="<?php if(isset($username)) echo $username; ?>" required>
                       </div>
                     </div>
 
                     <div class="col-12">
                       <label for="password" class="form-label">Password</label>
-                      <input type="password" name="password" class="form-control" id="password" required>
+                      <input type="password" name="password" class="form-control" id="password" value="<?php if(isset($password)) echo $password; ?>" required>
                     </div>
 
                     

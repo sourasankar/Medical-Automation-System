@@ -9,6 +9,26 @@
     die();
   }
 
+  //connection to db
+  require "assets/php/dbConnection.php";
+
+  if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMedicine"])){
+
+    //prepare and bind
+    $stmt = $conn->prepare("INSERT INTO medicine(name,category,vendor,rack) VALUES (?,?,?,?)");
+    $stmt->bind_param("ssss",$medicineName,$medicineCategory,$medicineVendor,$rackLocation);
+
+    //Data from Form
+    $medicineName = $_POST["medicineName"];
+    $medicineCategory = $_POST["medicineCategory"];
+    $medicineVendor = $_POST["medicineVendor"];
+    $rackLocation = $_POST["rackLocation"];
+    $stmt->execute();
+
+    $success = "Medicine details saved successfully";
+
+  }
+
 ?>
 
 <!DOCTYPE html>
@@ -111,12 +131,15 @@
           
               <div class="card">
                 <div class="card-body">
-                    
-                    <!-- <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
+                    <?php 
+                        if(isset($success)){
+                    ?>
+                    <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
                         <i class="bi bi-check-circle me-1"></i>
-                        Employee has been Added successfully
+                        Medicine details saved successfully
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div> -->
+                    </div>
+                    <?php } ?>
                     
                   <h5 class="card-title">Add New Medicine</h5>
 
@@ -133,9 +156,15 @@
                     <div class="col-md-6">
                       <label for="medicineVendor" class="form-label">Vendor</label>
                       <select id="medicineVendor" name="medicineVendor" class="form-select" required>
-                        <option value="">Choose...</option>
-                        <option value="4324">Alkem</option>
-                        <option value="43424">Cipla</option>
+                      <option value="">Choose...</option>
+                      <?php 
+                          $sql="SELECT vendor_id,name FROM vendor";
+                          $result = $conn->query($sql);
+                          $i=1;
+                          while($row = $result->fetch_assoc()){
+                       ?>
+                        <option value="<?php echo $row["vendor_id"]; ?>"><?php echo $row["name"]; ?></option>
+                        <?php } ?>
                       </select>
                     </div>
                     <div class="col-md-6">
@@ -239,15 +268,11 @@
 
   <!-- Script for filtering medicine -->
   <script>
-    //var batchNo = ["4324","65454","23465"];
     var medicineId = ["65445","432","987"];
     var medicineName = ["kooParacetamol 650","kgdParacetamol 650","hParacetamol 650"];
     var category = ["Painkiller","Painkiller","Painkiller"];
     var vendor = ["Alkem","Alkem","Alkem"];
-    //var mfd = ["Nov-2021","Nov-2021","Nov-2021"];
-    //var exp = ["Dec-2022","Dec-2022","Dec-2022"];
     var avlQty = [10,10,10];
-    //var price = [120,120,120];
     var rackNo = ["R5","R5","R5"];
 
     function tableContents(query,j){
@@ -300,6 +325,11 @@
             a.print();
         }
   </script>
+
+  <?php 
+    //connection to db close
+    $conn->close();
+  ?>
   
   <?php require "assets/php/footer.php"; ?>
 

@@ -28,6 +28,12 @@
       <div class="row">
         <div class="col-12">
 
+            <div class="alert alert-success alert-dismissible fade show col-md-8 col-xl-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
+                <i class="bi bi-check-circle me-1"></i>
+                Consignment has been Received and Added to Inventory
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
           <div class="card">
             <div class="card-body">
               <h5 class="card-title">Vendor: Alkem</h5>    

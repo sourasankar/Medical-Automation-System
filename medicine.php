@@ -209,20 +209,30 @@
                         </tr>
                       </thead>
                       <tbody id="tbody">
+                      <?php 
+                          $sql="SELECT medicine.medicine_id,medicine.name,medicine.category,medicine.vendor,medicine.rack,sum(medicine_stock.quantity) as avlQuantity from medicine LEFT JOIN medicine_stock on medicine.medicine_id=medicine_stock.medicine_id GROUP BY medicine.medicine_id";
+                          $result = $conn->query($sql);
+                          $i=1;
+                          while($row = $result->fetch_assoc()){
+                            $sql2 ="SELECT name FROM vendor WHERE vendor_id=$row["vendor"]";
+                            $result2 = $conn->query($sql2);
+                            $row2 = $result2->fetch_assoc();
+                       ?>
                         <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>
-                          <td>R5</td> 
+                          <th scope="row"><?php echo $i; ?></th>
+                          <td><?php echo $row["medicine_id"]; ?></td>
+                          <td><?php echo $row["name"]; ?></td>
+                          <td><?php echo $row["category"]; ?></td>
+                          <td><?php $row2["name"]; ?></td>
+                          <td><?php if($row["avlQuantity"]=="" || $row["avlQuantity"]=="0"){ echo "0";} else{ echo $row["avlQuantity"];} ?></td>
+                          <td><?php echo $row["rack"]; ?></td> 
                           <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-warning btn-sm" name="add" value="dsad465ad5">ADD</button>
+                              <form method="POST" action="medicine.php">
+                                  <button type="submit" class="btn btn-warning btn-sm" name="add" value="<?php echo $row["medicine_id"]; ?>">ADD</button>
                               </form>
                           </td>                         
                         </tr>
+                        <?php } ?>
                       </tbody>
                     </table>
                 </div>
@@ -268,6 +278,10 @@
 
   <!-- Script for filtering medicine -->
   <script>
+
+    <?php 
+        //$sql = "SELECT medicine.medicine_id,medicine.name,medicine.category,medicine.vendor,medicine.rack,sum(medicine_stock.quantity) as avlQuantity from medicine LEFT JOIN medicine_stock on medicine.medicine_id=medicine_stock.medicine_id GROUP BY medicine.medicine_id";
+    ?>
     var medicineId = ["65445","432","987"];
     var medicineName = ["kooParacetamol 650","kgdParacetamol 650","hParacetamol 650"];
     var category = ["Painkiller","Painkiller","Painkiller"];

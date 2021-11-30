@@ -295,6 +295,7 @@
     
   </main><!-- End #main -->
 
+  <!-- Script for Auto Price Calculate -->
   <script>
     var price=[10,20,30,40];
     var itemPrice=[10,20,30,40];
@@ -311,6 +312,20 @@
       document.getElementById("total").innerHTML="Total (Rs): "+sum+"/-";
     }
 
+  </script>
+
+  <!-- Script for filtering medicine -->
+  <script>
+    var batchNo = [9874662,9874662,9874662];
+    var medicineId = [8456,8456,8456];
+    var medicineName = ["Paracetamol 650","Paracetamol 650","Paracetamol 650"];
+    var category = ["Painkiller","Painkiller","Painkiller"];
+    var vendor = ["Alkem","Alkem","Alkem"];
+    var mfd = ["Nov-2021","Nov-2021","Nov-2021"];
+    var exp = ["Dec-2022","Dec-2022","Dec-2022"];
+    var avlQty = [10,10,10];
+    var price = [120,120,120];
+    var rackNo = ["R5","R5","R5"];
   </script>
   
   <?php require "assets/php/footer.php"; ?>

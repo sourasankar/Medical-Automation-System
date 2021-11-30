@@ -12,7 +12,7 @@
       </li><!-- End Dashboard Nav -->
       
       <li class="nav-item">
-        <a class="nav-link collapsed" href="generateCashReceipt.php">
+        <a class="nav-link collapsed" href="cashReceipt.php">
           <i class="bi bi-cart-plus"></i>
           <span>Cash Receipt</span>
         </a>
@@ -33,7 +33,7 @@
       </li>
       
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#">
+        <a class="nav-link collapsed" href="medicineToBeOrdered.php">
           <i class="bi bi-boxes"></i>
           <span>Medicine to be Ordered</span>
         </a>
@@ -49,7 +49,7 @@
       </li>
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#">
+        <a class="nav-link collapsed" href="vendor.php">
           <i class="bi bi-box-arrow-in-right"></i>
           <span>Vendor</span>
         </a>

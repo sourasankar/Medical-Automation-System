@@ -56,9 +56,9 @@
       </li>
       
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#">
+        <a class="nav-link collapsed" href="issueCheque.php">
           <i class="bi bi-box-arrow-in-right"></i>
-          <span>Issue Cheque Favouring Vendor</span>
+          <span>Issue Cheque</span>
         </a>
       </li>
 

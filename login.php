@@ -1,3 +1,59 @@
+<?php
+
+	//session start
+	session_start();
+
+	//Checking if user is already logged in
+	if(isset($_SESSION["username"])){
+
+		//User already logged in redirects to dashboard
+		header("Location: dashboard.php");
+		die();
+	}
+
+  //Error Msg
+  $errorMsgnull;
+
+  if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])){
+
+    //connection to db
+    require "assets/php/dbConnection.php";
+
+    // prepare and bind
+    $stmt = $conn->prepare("SELECT name,password FROM employee WHERE emp_id=?");
+    $stmt->bind_param("s", $username);
+
+    //Data from Form
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    if($result->num_rows==0){
+      $errorMsg = "Account Not Found";
+    }
+    else{
+      $row = $result->fetch_assoc();
+      if($row["password"]==$password){
+        //Logged IN
+        $_SESSION["username"]=$username;
+        $_SESSION["name"]=$row["name"];
+        header("Location: dashboard.php");
+        die();
+      }
+      else{
+        $errorMsg = "Password Not Matched";
+      }
+    }
+
+    //connection to db close
+    $conn->close();
+  
+  }
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,26 +90,26 @@
                     <h5 class="card-title text-center pb-0 fs-4">Login</h5>
                     <p class="text-center small">Enter your username & password to login</p>
                   </div>
-                    
-                    <!-- <div class="alert alert-danger text-center" style="padding: 1px 20px;font-weight: 600;" role="alert">
-                        <i class="bi bi-exclamation-triangle"></i> <%= errorMsg %>
-                    </div> -->
-                   
+                    <?php 
+                        if(isset($errorMsg)){
+                    ?>
+                    <div class="alert alert-danger text-center" style="padding: 1px 20px;font-weight: 600;" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> <?php echo $errorMsg; ?>
+                    </div>
+                    <?php }?>                   
 
                     <form method="POST" action="#" class="row g-3">
 
                     <div class="col-12">
-                      <label for="branchUsername" class="form-label">Username</label>
+                      <label for="username" class="form-label">Username</label>
                       <div class="input-group">
-                          <input type="text" name="branchUsername" class="form-control" id="branchUsername" required>
-<!--                        <div class="invalid-feedback">Please enter your username.</div>-->
+                          <input type="text" name="username" class="form-control" id="username" required>
                       </div>
                     </div>
 
                     <div class="col-12">
-                      <label for="branchPassword" class="form-label">Password</label>
-                      <input type="password" name="branchPassword" class="form-control" id="branchPassword" required>
-<!--                      <div class="invalid-feedback">Please enter your password!</div>-->
+                      <label for="password" class="form-label">Password</label>
+                      <input type="password" name="password" class="form-control" id="password" required>
                     </div>
 
                     

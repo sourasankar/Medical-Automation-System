@@ -42,7 +42,7 @@
       <li class="nav-heading">Manage</li>
       
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#">
+        <a class="nav-link collapsed" href="medicine.php">
           <i class="bi bi-box-arrow-in-right"></i>
           <span>Medicine</span>
         </a>

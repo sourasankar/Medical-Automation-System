@@ -23,7 +23,7 @@
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Manage Vendor</h1>
+      <h1>Manage Vendors</h1>
     </div><!-- End Page Title -->
     
         <div class="row">

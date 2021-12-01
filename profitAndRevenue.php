@@ -19,22 +19,12 @@
     $totalPurchased = $totalPurchased + ((int)$row["purchase_price"]*(int)$row["quantity"]);
   }
 
-  $medicineCount = $row["count"];
-
-  $sql = "SELECT COUNT(*) as count FROM medicine_stock WHERE exp<CURDATE()";
-
-  $result = $conn->query($sql);                            
-  $row = $result->fetch_assoc();
-
-  $expired = $row["count"];
-
-  $sql = "SELECT COUNT(*) as count FROM medicine_stock WHERE MONTH(exp)=MONTH(CURDATE()) AND YEAR(exp)=YEAR(CURDATE())";
-
-  $result = $conn->query($sql);                            
-  $row = $result->fetch_assoc();
-
-  $expiring = $row["count"];
-
+  $sql ="SELECT * FROM sold_medicine";
+  $result = $conn->query($sql);
+  $totalSold = 0;                            
+  while($row = $result->fetch_assoc()){
+    $totalSold = $totalSold + ((int)$row["price"]*(int)$row["quantity"]);
+  }
 
 ?>
 <!DOCTYPE html>
@@ -75,7 +65,7 @@
 
                       <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: #4154f1;background: #f6f6fe;">
-                          <i class="bi bi-shield-plus"></i>
+                          <i class="bi bi-cash"></i>
                         </div>
                         <div class="ps-3">
                           <h6><?php if($totalPurchased!=0) echo $totalPurchased; else echo "0";?>/-</h6>
@@ -94,10 +84,10 @@
 
                       <div class="d-flex align-items-center">
                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: #ff771d;background: #ffecdf;">
-                        <i class="bi bi-calendar-x"></i>
+                        <i class="bi bi-currency-exchange"></i>
                         </div>
                         <div class="ps-3">
-                          <h6><?php if($expiring!=0) echo $expiring; else echo "0"; ?></h6>
+                          <h6><?php if($totalSold!=0) echo $totalSold; else echo "0"; ?>/-</h6>
                         </div>
                       </div>
                     </div>
@@ -113,10 +103,10 @@
 
                       <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: rgb(46, 202, 106);background: rgb(224, 248, 233);">
-                          <i class="bi bi-calendar-x"></i>
+                          <i class="bi bi-graph-up-arrow"></i>
                         </div>
                         <div class="ps-3">
-                          <h6><?php if($expired!=0) echo $expired; else echo "0"; ?></h6>
+                          <h6><?php echo (int)(($totalSold/$totalPurchased)*100); ?>%</h6>
                         </div>
                       </div>
 
@@ -132,10 +122,10 @@
 
                       <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: rgb(46, 202, 106);background: rgb(224, 248, 233);">
-                          <i class="bi bi-calendar-x"></i>
+                          <i class="bi bi-wallet2"></i>
                         </div>
                         <div class="ps-3">
-                          <h6><?php if($expired!=0) echo $expired; else echo "0"; ?></h6>
+                          <h6><?php echo $totalSold-$totalPurchased; ?>/-</h6>
                         </div>
                       </div>
 

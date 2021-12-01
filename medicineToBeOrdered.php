@@ -9,6 +9,9 @@
     die();
   }
 
+  //connection to db
+  require "assets/php/dbConnection.php";
+
 ?>
 
 <!DOCTYPE html>
@@ -59,70 +62,26 @@
                         </tr>
                       </thead>
                       <tbody>
+                        <?php 
+                            $sql = "SELECT * FROM medicine WHERE required!='0'";
+                            $result = $conn->query($sql); 
+                            $i=1;                           
+                            while($row = $result->fetch_assoc()){
+                              $sql2 ="SELECT name FROM vendor WHERE vendor_id='".$row["vendor_id"]."'";
+                              $result2 = $conn->query($sql2);                            
+                              $row2 = $result2->fetch_assoc();
+                        ?>
                         <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
+                          <th scope="row"><?php echo $i; ?></th>
+                          <td><?php echo $row["medicine_id"]; ?></td>
+                          <td><?php echo $row["name"]; ?></td>
+                          <td><?php echo $row["category"]; ?></td>
+                          <td><?php echo $row2["name"]; ?></td>
+                          <td><?php echo $row["required"]; ?></td>                      
                         </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>10</td>                      
-                        </tr>
+                        <?php
+                           $i++; }
+                        ?>                        
                       </tbody>
                     </table>
                 </div>
@@ -134,6 +93,11 @@
         </div>        
     
   </main><!-- End #main -->
+
+  <?php 
+    //connection to db close
+    $conn->close();
+  ?>
   
   <?php require "assets/php/footer.php"; ?>
 

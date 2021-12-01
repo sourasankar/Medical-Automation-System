@@ -26,7 +26,7 @@
       </li>
       
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#">
+        <a class="nav-link collapsed" href="profitAndRevenue.php">
           <i class="bi bi-graph-up-arrow"></i>
           <span>Profit & Revenue</span>
         </a>

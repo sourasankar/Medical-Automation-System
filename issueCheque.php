@@ -9,7 +9,20 @@
     die();
   }
 
-  //SELECT medicine.name,medicine.vendor_id,purchases.quantity,purchases.purchase_price FROM medicine INNER JOIN purchases ON medicine.medicine_id=purchases.medicine_id WHERE purchases.paid="NO"
+  //connection to db
+  require "assets/php/dbConnection.php";
+
+  $sql = "SELECT medicine.name,medicine.vendor_id,purchases.quantity,purchases.purchase_price FROM medicine INNER JOIN purchases ON medicine.medicine_id=purchases.medicine_id WHERE purchases.paid='NO'";
+  $result = $conn->query($sql);
+  $count=0;
+  while($row = $result->fetch_assoc()){
+    $medicineName[$count] = $row["name"];
+    $vendorId[$count] = $row["vendor_id"];
+    $medicineQuantity[$count] = $row["quantity"]; 
+    $purchasePrice[$count] = $row["purchase_price"];
+    $count++;
+  }
+
 
 ?>
 
@@ -48,37 +61,67 @@
                 Consignment has been Received and Added to Inventory
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div> -->
-
+          <?php 
+              $sql="SELECT vendor_id,name,account_no,ifsc_code FROM vendor";
+              $result = $conn->query($sql);
+              $flag=0;
+              while($row = $result->fetch_assoc()){
+                $i=0;
+                while($i<$count){
+                  if($vendorId[$i]==$row["vendor_id"]){
+                    $flag=1;
+                    break;
+                  }
+                  else{
+                    $flag=0;
+                  }
+                  $i++; 
+                }
+                if($flag==0){
+                  continue;
+                } 
+                
+          ?>
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title">Vendor: Alkem</h5>    
+              <h5 class="card-title">Vendor: <?php echo $row["name"]; ?></h5>    
 
                     <div style="display: flex;justify-content: space-evenly;" class="row"> 
                         <fieldset style="all: revert; font-weight: 600;width: fit-content;" class="col-6">
-                            <legend style="all: revert;">Alkem:</legend>
-                            <u>Med #Qty @Price</u><br>
-                            Paracetamol 650 #2 @120/-<br>
-                            Paracetamol 650 #2 @120/-<br>
-                            Paracetamol 650 #2 @120/-<br><br>
-                            Total Price: 360/-<br><br> 
+                            <legend style="all: revert;"><?php echo $row["name"].":"; ?></legend>
+                            <u>Med #Qty @Price</u><br><br>
+                            <?php
+                                $i=0;
+                                $priceCount=0;
+                                while($i<$count){
+                                  if($vendorId[$i]==$row["vendor_id"]){
+                                    echo $medicineName[$i]." #".$medicineQuantity[$i]." @".$purchasePrice[$i]."/-<br>";
+                                    $priceCount = $priceCount+ ($medicineQuantity[$i]*$purchasePrice[$i]);
+                                  }
+                                  $i++; 
+                                } 
+                            ?>
+                            <br>Total Price: <?php echo $priceCount; ?>/-<br><br> 
                             <u>Transfer Money to:</u><br>
-                            Account No: 9874565633221<br>
-                            IFSC Code: SBIN4566IN                                   
+                            Account No: <?php echo $row["account_no"]; ?><br>
+                            IFSC Code: <?php echo $row["ifsc_code"]; ?>                                   
                         </fieldset>                      
                     </div>     
                 <div class="text-center" style="margin-top: 20px;">
-                    <button type="button" class="btn btn-danger col-3 col-md-2 col-lg-1" onclick="payVendor('alkem')">Paid</button>
+                    <button type="button" class="btn btn-danger col-3 col-md-2 col-lg-1" onclick='payVendor("<?php echo $row["vendor_id"] ?>")'>Paid</button>
                 </div> 
             
             </div>
 
           </div>
+          <?php } ?>
+
         </div>
 
       </div>        
     
   </main><!-- End #main -->
-  <form method="GET" action="#" id="payVendor">
+  <form method="POST" action="issueCheque.php" id="payVendor">
     <input type="hidden" name="vendorId" id="vendorId">
   </form>
 
@@ -89,6 +132,11 @@
       document.getElementById("payVendor").submit();
     }
   </script>
+
+  <?php 
+    //connection to db close
+    $conn->close();
+  ?>
 
   <?php require "assets/php/footer.php"; ?>
 

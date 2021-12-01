@@ -12,6 +12,13 @@
   //connection to db
   require "assets/php/dbConnection.php";
 
+  if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])){
+
+    $sql = "DELETE FROM medicine_stock WHERE batch_no='".$_POST["delete"]."'";
+    $conn->query($sql);
+
+  }
+
 ?>
 
 <!DOCTYPE html>
@@ -65,6 +72,7 @@
                           <th scope="col">Retail Price</th>
                           <th scope="col">Selling Price</th>
                           <th scope="col">Rack No</th>
+                          <th scope="col"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -92,7 +100,12 @@
                           <td><?php echo $row["quantity"]; ?></td>
                           <td><?php echo $row["purchase_price"]; ?>/-</td>
                           <td><?php echo $row["selling_price"]; ?>/-</td>
-                          <td><?php echo $row2["rack"]; ?></td>                          
+                          <td><?php echo $row2["rack"]; ?></td> 
+                          <td>
+                              <form method="POST" action="expiredMedicine.php">
+                                  <button type="submit" class="btn btn-danger btn-sm" name="delete" value="<?php echo $row["batch_no"]; ?>"><i class="bi bi-trash"></i></button>
+                              </form>
+                          </td>                         
                         </tr>
                         <?php
                            $i++; }

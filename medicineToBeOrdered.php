@@ -12,6 +12,13 @@
   //connection to db
   require "assets/php/dbConnection.php";
 
+  if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])){
+
+    $sql = "UPDATE medicine SET required='0' WHERE medicine_id=".$_POST["delete"];
+    $conn->query($sql);
+
+  }
+
 ?>
 
 <!DOCTYPE html>
@@ -59,6 +66,7 @@
                           <th scope="col">Category</th>
                           <th scope="col">Vendor</th>
                           <th scope="col">Quantity</th>
+                          <th scope="col"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -77,7 +85,12 @@
                           <td><?php echo $row["name"]; ?></td>
                           <td><?php echo $row["category"]; ?></td>
                           <td><?php echo $row2["name"]; ?></td>
-                          <td><?php echo $row["required"]; ?></td>                      
+                          <td><?php echo $row["required"]; ?></td>  
+                          <td>
+                              <form method="POST" action="medicineToBeOrdered.php">
+                                  <button type="submit" class="btn btn-danger btn-sm" name="delete" value="<?php echo $row["medicine_id"]; ?>"><i class="bi bi-trash"></i></button>
+                              </form>
+                          </td>                    
                         </tr>
                         <?php
                            $i++; }

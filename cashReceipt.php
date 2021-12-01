@@ -55,9 +55,21 @@
       $stmt2->execute();     
       $sum = $sum + ($soldMedicinePrice*$soldMedicineQuantity);
 
+      $sql = "SELECT quantity FROM medicine_stock WHERE batch_no='".$_SESSION["medicineBatchNo"][$j]."'";
+      $result = $conn->query($sql);                            
+      $row = $result->fetch_assoc();
+
+      $newQuantity = (int)$row["quantity"]-$soldMedicineQuantity;
+      //echo print_r($result);
+
+      $sql = "UPDATE medicine_stock SET quantity='".$newQuantity."' WHERE batch_no='".$_SESSION["medicineBatchNo"][$j]."'";
+      $conn->query($sql);
+
       $j++;
     }
     $counter = $j;
+
+    
     unset($_SESSION["j"]);
     unset($_SESSION["medicineBatchNo"]);
     

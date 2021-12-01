@@ -12,6 +12,16 @@
   //connection to db
   require "assets/php/dbConnection.php";
 
+  if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["vendorId"])){
+    $sql = "UPDATE purchases SET paid='YES' WHERE paid='NO' AND medicine_id IN (SELECT medicine_id FROM medicine WHERE vendor_id=".$_POST["vendorId"].")";
+    $conn->query($sql);
+
+    $sql = "SELECT name FROM vendor WHERE vendor_id=".$_POST["vendorId"];
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
+    $success = "Dues has been paid to ".$row["name"];
+  }
+
   $sql = "SELECT medicine.name,medicine.vendor_id,purchases.quantity,purchases.purchase_price FROM medicine INNER JOIN purchases ON medicine.medicine_id=purchases.medicine_id WHERE purchases.paid='NO'";
   $result = $conn->query($sql);
   $count=0;
@@ -55,12 +65,16 @@
 
       <div class="row">
         <div class="col-12">
-
-            <!-- <div class="alert alert-success alert-dismissible fade show col-md-8 col-xl-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
+          <?php
+              if(isset($success)){
+          ?>
+            <div class="alert alert-success alert-dismissible fade show col-md-8 col-xl-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
                 <i class="bi bi-check-circle me-1"></i>
-                Consignment has been Received and Added to Inventory
+                <?php echo $success; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div> -->
+            </div>
+
+          <?php } ?>
           <?php 
               $sql="SELECT vendor_id,name,account_no,ifsc_code FROM vendor";
               $result = $conn->query($sql);

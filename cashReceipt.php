@@ -9,6 +9,30 @@
     die();
   }
 
+  //connection to db
+  require "assets/php/dbConnection.php";
+
+  if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])){
+    if(isset($_SESSION["j"])){
+      $_SESSION["j"]++;
+    }
+    else{
+      $_SESSION["j"]=1;
+    }
+    $_SESSION["medicineBatchNo"][$_SESSION["j"]-1] = $_POST["add"];
+  }
+  else if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])){
+    $i=0;
+    while(isset($_SESSION["medicineBatchNo"][$i])){
+      if($_SESSION["medicineBatchNo"][$i]==$_POST["delete"]){
+        unset($_SESSION["medicineBatchNo"][$i]);
+        $_SESSION["medicineBatchNo"] = array_values($_SESSION["medicineBatchNo"]);
+        $_SESSION["j"]--;
+      }
+      $i++;
+    }
+  }
+
 ?>
 
 <!DOCTYPE html>
@@ -65,11 +89,13 @@
               </div>
 
           </div> -->
-
+          <?php
+              if (isset($_SESSION["j"]) && $_SESSION["j"]!=0){
+          ?>
           <div class="card">
             <div class="card-body" >
               
-              <form method="POST" action="#">
+              <form method="POST" action="cashReceipt.php">
                 <h5 class="card-title">Invoice</h5>
                 <div style="overflow: auto;">
                     <table class="table table-striped table-bordered">
@@ -87,56 +113,49 @@
                         </tr>
                       </thead>
                       <tbody>
+                        <?php 
+                            $i=0;
+                            $totalPrice=0;
+                            while(isset($_SESSION["medicineBatchNo"][$i])){
+                              $sql ="SELECT * FROM medicine_stock WHERE batch_no='".$_SESSION["medicineBatchNo"][$i]."'";                    
+                              $result = $conn->query($sql);                            
+                              $row = $result->fetch_assoc();
+                              $sql2 = "SELECT name,vendor_id FROM medicine WHERE medicine_id=".$row["medicine_id"];                              
+                              $result2 = $conn->query($sql2);
+                              $row2 = $result2->fetch_assoc();
+                              $sql3 = "SELECT name FROM vendor WHERE vendor_id=".$row2["vendor_id"];                              
+                              $result3 = $conn->query($sql3);
+                              $row3 = $result3->fetch_assoc();
+                        ?>
                         <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Alkem</td>
-                          <td>Dec-2022</td>
-                          <td><input onchange="calPrice(this.value,1)" type="number" class="form-control-sm" style="width: 70px;" name="med1" value="1" min=1></td>
-                          <td id="med1">10/-</td>
+                          <th scope="row"><?php echo $i+1; ?></th>
+                          <td><?php echo $row["batch_no"]; ?></td>
+                          <td><?php echo $row["medicine_id"]; ?></td>
+                          <td><?php echo $row2["name"]; ?></td>
+                          <td><?php echo $row3["name"]; ?></td>
+                          <td><?php echo date_format(date_create($row["exp"]),"M-Y"); ?></td>
+                          <td><input onchange="calPrice(this.value,<?php echo $i; ?>)" type="number" class="form-control-sm" style="width: 70px;" name="med<?php echo $i; ?>" value="1" min=1></td>
+                          <td id="med<?php echo $i; ?>">
+                            <?php 
+                            $itemPrice[$i] = $row["selling_price"];
+                            $totalPrice = $totalPrice + $row["selling_price"];
+                            echo $row["selling_price"]; 
+                            ?>/-
+                          </td>
                           <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-danger btn-sm" name="delete" value="dsad465ad5"><i class="bi bi-trash"></i></button>
+                              <form method="POST" action="cashReceipt.php">
+                                  <button type="submit" class="btn btn-danger btn-sm" name="delete" value="<?php echo $row["batch_no"]; ?>"><i class="bi bi-trash"></i></button>
                               </form>
                           </td>                         
                         </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Alkem</td>
-                          <td>Dec-2022</td>
-                          <td><input onchange="calPrice(this.value,2)" type="number" class="form-control-sm" style="width: 70px;" name="med2" value="1" min=1></td>
-                          <td id="med2">20/-</td>
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-danger btn-sm" name="delete" value="dsad465ad5"><i class="bi bi-trash"></i></button>
-                              </form>
-                          </td>                         
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Alkem</td>
-                          <td>Dec-2022</td>
-                          <td><input onchange="calPrice(this.value,3)" type="number" class="form-control-sm" style="width: 70px;" name="med3" value="1" min=1></td>
-                          <td id="med3">30/-</td>
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-danger btn-sm" name="delete" value="dsad465ad5"><i class="bi bi-trash"></i></button>
-                              </form>
-                          </td>                         
-                        </tr>                                              
+                        <?php
+                          $i++;  }
+                        ?>                                            
                       </tbody>
                     </table>                  
                 </div>
                 <div class="align-middle" style="font-weight: 700;display: flex;justify-content: center;align-items: center;">      
-                  <div id="total">Total (Rs): 60/-</div>
+                  <div id="total">Total (Rs): <?php echo $totalPrice; ?>/-</div>
                   <button type="submit" class="btn btn-primary btn-sm" style="margin-left: 25px;" name="generate">Generate</button>    
                 </div>
               </form>
@@ -144,6 +163,9 @@
             </div>
 
           </div>
+          <?php 
+              }
+          ?>
 
           <div class="card">
             <div class="card-body" >
@@ -177,133 +199,40 @@
                         </tr>
                       </thead>
                       <tbody id="tbody">
+                        <?php 
+                          $sql="SELECT * FROM medicine_stock WHERE exp>CURDATE()+INTERVAL 1 MONTH";
+                          $result = $conn->query($sql);
+                          $i=0;
+                          while($row = $result->fetch_assoc()){
+                            $sql2 = "SELECT * FROM medicine WHERE medicine_id=".$row["medicine_id"];
+                            $result2 = $conn->query($sql2);
+                            $row2 = $result2->fetch_assoc();
+                            $sql3 = "SELECT name FROM vendor WHERE vendor_id=".$row2["vendor_id"];
+                            $result3 = $conn->query($sql3);
+                            $row3 = $result3->fetch_assoc();
+                        ?>
                         <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>Nov-2021</td>
-                          <td>Dec-2022</td>
-                          <td>10</td>
-                          <td>120/-</td>
-                          <td>R5</td> 
+                          <th scope="row"><?php echo $i+1; ?></th>
+                          <td><?php echo $medicineBatchNo[$i]=$row["batch_no"]; ?></td>
+                          <td><?php echo $medicineId[$i]=$row["medicine_id"]; ?></td>
+                          <td><?php echo $medicineName[$i]=$row2["name"]; ?></td>
+                          <td><?php echo $medicineCategory[$i]=$row2["category"]; ?></td>
+                          <td><?php echo $medicineVendor[$i]=$row3["name"]; ?></td>
+                          <td><?php echo $medicineMfg[$i]=date_format(date_create($row["mfg"]),"M-Y"); ?></td>
+                          <td><?php echo $medicineExp[$i]=date_format(date_create($row["exp"]),"M-Y"); ?></td>
+                          <td><?php echo $medicineAvlQuantity[$i]=$row["quantity"]; ?></td>
+                          <td><?php echo $medicineSPrice[$i]=$row["selling_price"]; ?>/-</td>
+                          <td><?php echo $medicineRack[$i]=$row2["rack"]; ?></td> 
                           <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="dsad465ad5">ADD</button>
+                              <form method="POST" action="cashReceipt.php">
+                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="<?php echo $row["batch_no"]; ?>">ADD</button>
                               </form>
                           </td>                         
-                        </tr>   
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>Nov-2021</td>
-                          <td>Dec-2022</td>
-                          <td>10</td>
-                          <td>120/-</td>
-                          <td>R5</td> 
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="dsad465ad5">ADD</button>
-                              </form>
-                          </td>                         
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>Nov-2021</td>
-                          <td>Dec-2022</td>
-                          <td>10</td>
-                          <td>120/-</td>
-                          <td>R5</td> 
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="dsad465ad5">ADD</button>
-                              </form>
-                          </td>                         
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>Nov-2021</td>
-                          <td>Dec-2022</td>
-                          <td>10</td>
-                          <td>120/-</td>
-                          <td>R5</td> 
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="dsad465ad5">ADD</button>
-                              </form>
-                          </td>                         
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>Nov-2021</td>
-                          <td>Dec-2022</td>
-                          <td>10</td>
-                          <td>120/-</td>
-                          <td>R5</td> 
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="dsad465ad5">ADD</button>
-                              </form>
-                          </td>                         
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>Nov-2021</td>
-                          <td>Dec-2022</td>
-                          <td>10</td>
-                          <td>120/-</td>
-                          <td>R5</td> 
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="dsad465ad5">ADD</button>
-                              </form>
-                          </td>                         
-                        </tr>
-                        <tr class="align-middle">
-                          <th scope="row">1</th>
-                          <td>9874662</td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Painkiller</td>
-                          <td>Alkem</td>
-                          <td>Nov-2021</td>
-                          <td>Dec-2022</td>
-                          <td>10</td>
-                          <td>120/-</td>
-                          <td>R5</td> 
-                          <td>
-                              <form method="POST" action="#">
-                                  <button type="submit" class="btn btn-primary btn-sm" name="add" value="dsad465ad5">ADD</button>
-                              </form>
-                          </td>                         
-                        </tr>        
-
+                        </tr>                             
+                        <?php
+                          $i++;
+                          }
+                        ?>
                       </tbody>
                     </table>
                 </div>
@@ -318,11 +247,35 @@
 
   <!-- Script for Auto Price Calculate -->
   <script>
-    var itemPrice=[10,20,30];
+    var itemActutalPrice=[
+      <?php 
+        $j=0;
+        while($j< $_SESSION["j"]){
+          echo $itemPrice[$j];
+          if(isset($itemPrice[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+
+    var itemPrice=[
+      <?php 
+        $j=0;
+        while($j< $_SESSION["j"]){
+          echo $itemPrice[$j];
+          if(isset($itemPrice[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];    
 
     function calPrice(qty,n){
-      var product = qty*price[n-1];
-      itemPrice[n-1] = product;
+      var product = qty*itemActutalPrice[n];
+      itemPrice[n] = product;
       var i=0,sum=0;
       while(itemPrice[i]!=null){
         sum+=itemPrice[i];
@@ -336,16 +289,126 @@
 
   <!-- Script for filtering medicine -->
   <script>
-    var batchNo = ["4324","65454","23465"];
-    var medicineId = ["65445","432","987"];
-    var medicineName = ["kooParacetamol 650","kgdParacetamol 650","hParacetamol 650"];
-    var category = ["Painkiller","Painkiller","Painkiller"];
-    var vendor = ["Alkem","Alkem","Alkem"];
-    var mfd = ["Nov-2021","Nov-2021","Nov-2021"];
-    var exp = ["Dec-2022","Dec-2022","Dec-2022"];
-    var avlQty = [10,10,10];
-    var price = [10,20,30];
-    var rackNo = ["R5","R5","R5"];
+    var batchNo = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineBatchNo[$j].'"';
+          if(isset($medicineBatchNo[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var medicineId = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineId[$j].'"';
+          if(isset($medicineId[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var medicineName = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineName[$j].'"';
+          if(isset($medicineName[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var category = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineCategory[$j].'"';
+          if(isset($medicineCategory[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var vendor = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineVendor[$j].'"';
+          if(isset($medicineVendor[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var mfd = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineMfg[$j].'"';
+          if(isset($medicineMfg[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var exp = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineExp[$j].'"';
+          if(isset($medicineExp[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var avlQty = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo $medicineAvlQuantity[$j];
+          if(isset($medicineAvlQuantity[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var price = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo $medicineSPrice[$j];
+          if(isset($medicineSPrice[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var rackNo = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineRack[$j].'"';
+          if(isset($medicineRack[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
 
     function tableContents(query,j){
       var body="";
@@ -397,6 +460,11 @@
             a.print();
         }
   </script>
+
+  <?php 
+    //connection to db close
+    $conn->close();
+  ?>
   
   <?php require "assets/php/footer.php"; ?>
 

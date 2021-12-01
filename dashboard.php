@@ -9,6 +9,30 @@
     die();
   }
 
+  //connection to db
+  require "assets/php/dbConnection.php";
+
+  $sql ="SELECT COUNT(*) as count FROM medicine";
+  $result = $conn->query($sql);                            
+  $row = $result->fetch_assoc();
+
+  $medicineCount = $row["count"];
+
+  $sql = "SELECT COUNT(*) as count FROM medicine_stock WHERE exp<CURDATE()";
+
+  $result = $conn->query($sql);                            
+  $row = $result->fetch_assoc();
+
+  $expired = $row["count"];
+
+  $sql = "SELECT COUNT(*) as count FROM medicine_stock WHERE MONTH(exp)=MONTH(CURDATE()) AND YEAR(exp)=YEAR(CURDATE())";
+
+  $result = $conn->query($sql);                            
+  $row = $result->fetch_assoc();
+
+  $expiring = $row["count"];
+
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -48,10 +72,10 @@
 
                       <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: #4154f1;background: #f6f6fe;">
-                          <i class="bi bi-people"></i>
+                          <i class="bi bi-shield-plus"></i>
                         </div>
                         <div class="ps-3">
-                          <h6>3</h6>
+                          <h6><?php if($medicineCount!=0) echo $medicineCount; else echo "0";?></h6>
                         </div>
                       </div>
                     </div>
@@ -67,10 +91,10 @@
 
                       <div class="d-flex align-items-center">
                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: #ff771d;background: #ffecdf;">
-                          <i class="bi bi-truck"></i>
+                        <i class="bi bi-calendar-x"></i>
                         </div>
                         <div class="ps-3">
-                          <h6>14</h6>
+                          <h6><?php if($expiring!=0) echo $expiring; else echo "0"; ?></h6>
                         </div>
                       </div>
                     </div>
@@ -86,29 +110,10 @@
 
                       <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: rgb(46, 202, 106);background: rgb(224, 248, 233);">
-                          <i class="bi bi-boxes"></i>
+                          <i class="bi bi-calendar-x"></i>
                         </div>
                         <div class="ps-3">
-                          <h6>12</h6>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-            </div>
-
-            <div class="col-sm-6 col-md-4 col-lg-3">
-                <div class="card info-card">
-
-                    <div class="card-body">
-                      <h5 class="card-title">Sales Today</h5>
-
-                      <div class="d-flex align-items-center">
-                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="color: rgb(46, 202, 106);background: rgb(224, 248, 233);">
-                          <i class="bi bi-boxes"></i>
-                        </div>
-                        <div class="ps-3">
-                          <h6>12</h6>
+                          <h6><?php if($expired!=0) echo $expired; else echo "0"; ?></h6>
                         </div>
                       </div>
 

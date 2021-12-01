@@ -15,7 +15,7 @@
   if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMedicine"])){
 
     //prepare and bind
-    $stmt = $conn->prepare("INSERT INTO medicine(name,category,vendor_id,rack) VALUES (?,?,?,?)");
+    $stmt = $conn->prepare("INSERT INTO medicine(name,category,vendor_id,rack,required) VALUES (?,?,?,?,'0')");
     $stmt->bind_param("ssss",$medicineName,$medicineCategory,$medicineVendor,$rackLocation);
 
     //Data from Form

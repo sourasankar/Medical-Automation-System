@@ -65,6 +65,15 @@
       $sql = "UPDATE medicine_stock SET quantity='".$newQuantity."' WHERE batch_no='".$_SESSION["medicineBatchNo"][$j]."'";
       $conn->query($sql);
 
+      $sql = "SELECT required FROM medicine WHERE medicine_id=".$soldMedicineId;
+      $result = $conn->query($sql);                            
+      $row = $result->fetch_assoc();
+
+      $newRequired = (int)$row["required"]+$soldMedicineQuantity;
+
+      $sql = "UPDATE medicine SET required='".$newRequired."' WHERE medicine_id=".$soldMedicineId;
+      $conn->query($sql);
+
       $j++;
     }
     $counter = $j;

@@ -15,7 +15,7 @@
   if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMedicine"])){
 
     //prepare and bind
-    $stmt = $conn->prepare("INSERT INTO medicine(name,category,vendor,rack) VALUES (?,?,?,?)");
+    $stmt = $conn->prepare("INSERT INTO medicine(name,category,vendor_id,rack) VALUES (?,?,?,?)");
     $stmt->bind_param("ssss",$medicineName,$medicineCategory,$medicineVendor,$rackLocation);
 
     //Data from Form
@@ -27,6 +27,62 @@
 
     $success = "Medicine details saved successfully";
 
+  }
+  else if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])){
+    if(isset($_SESSION["i"])){
+      $_SESSION["i"]++;
+    }
+    else{
+      $_SESSION["i"]=1;
+    }
+    $_SESSION["medicineId"][$_SESSION["i"]-1] = $_POST["add"];
+  }
+  else if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])){
+    $i=0;
+    while(isset($_SESSION["medicineId"][$i])){
+      if($_SESSION["medicineId"][$i]==$_POST["delete"]){
+        unset($_SESSION["medicineId"][$i]);
+        $_SESSION["medicineId"] = array_values($_SESSION["medicineId"]);
+        $_SESSION["i"]--;
+      }
+      $i++;
+    }
+  }
+  else if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["generate"])){
+    $i = $_SESSION["i"];
+
+    //prepare and bind
+    $stmt = $conn->prepare("INSERT INTO medicine_stock(medicine_id,batch_no,mfg,exp,quantity,purchase_price,selling_price) VALUES (?,?,?,?,?,?,?)");
+    $stmt->bind_param("issssss",$medicineId,$medicineBatchNo,$medicineMfg,$medicineExp,$medicineQuantity,$medicinePPrice,$medicinesPrice);
+
+    $stmt2 = $conn->prepare("INSERT INTO purchases(medicine_id,date,purchase_price,quantity,paid) VALUES (?,?,?,?,?)");
+    $stmt2->bind_param("issss",$PmedicineId,$todayDate,$PmedicinePPrice,$PmedicineQuantity,$paid);
+
+    $j=0;
+    while($j<$i){
+      //data from FORM
+      $medicineId = $_SESSION["medicineId"][$j];
+      $medicineBatchNo = $_POST["batchNoMed".$j];
+      $medicineMfg = $_POST["mfgDateMed".$j]."-01";
+      $medicineExp = date("Y-m-t", strtotime($_POST["expDateMed".$j]."-01"));
+      $medicineQuantity = $_POST["qtyMed".$j];
+      $medicinePPrice = $_POST["rPriceMed".$j];
+      $medicinesPrice = $_POST["sPriceMed".$j];
+      $stmt->execute();
+
+      $PmedicineId = $_SESSION["medicineId"][$j];
+      $todayDate = date("Y-m-d");
+      $PmedicinePPrice = $_POST["rPriceMed".$j];
+      $PmedicineQuantity = $_POST["qtyMed".$j];
+      $paid = "NO";
+      $stmt2->execute();      
+
+      $j++;
+    }
+    unset($_SESSION["i"]);
+    unset($_SESSION["medicineId"]);
+
+    $supplySuccess = "";
   }
 
 ?>
@@ -60,17 +116,24 @@
 
       <div class="row">
         <div class="col-12">
-
+          <?php 
+              if(isset($supplySuccess)){
+          ?>
+          <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            Supply details has been Added successfully
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <?php
+              }
+          ?>
+          <?php
+              if (isset($_SESSION["i"]) && $_SESSION["i"]!=0){
+          ?>
           <div class="card">
             <div class="card-body" >
 
-               <!-- <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
-                        <i class="bi bi-check-circle me-1"></i>
-                        Employee has been Added successfully
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div> -->
-              
-              <form method="POST" action="#">
+              <form method="POST" action="medicine.php">
                 <h5 class="card-title">Add Supply</h5>
                 <div style="overflow: auto;">
                     <table class="table table-striped table-bordered">
@@ -84,38 +147,47 @@
                           <th scope="col">Mfg.</th>
                           <th scope="col">Exp.</th>
                           <th scope="col">Qty.</th>
-                          <th scope="col">R.Price</th>
-                          <th scope="col">S.Price</th>
+                          <th scope="col">R.Price (Rs)</th>
+                          <th scope="col">S.Price (Rs)</th>
                           <th scope="col"></th>
                         </tr>
                       </thead>
                       <tbody>
+                        <?php 
+                            $i=0;
+                            while(isset($_SESSION["medicineId"][$i])){
+                              $sql ="SELECT medicine.name,vendor.name as vendorName from medicine LEFT JOIN vendor on medicine.vendor_id=vendor.vendor_id WHERE medicine.medicine_id=".$_SESSION["medicineId"][$i];
+                              $result = $conn->query($sql);                            
+                              $row = $result->fetch_assoc();
+                        ?>
                         <tr class="align-middle">
-                          <th scope="row">1</th>
+                          <th scope="row"><?php echo $i+1; ?></th>
                           <td>
-                            <input type="text" class="form-control-sm" style="width: 100px;" name="batchNoMed1" required>
+                            <input type="text" class="form-control-sm" style="width: 100px;" name="batchNoMed<?php echo $i; ?>" required>
                           </td>
-                          <td>8456</td>
-                          <td>Paracetamol 650</td>
-                          <td>Alkem</td>
+                          <td><?php echo $_SESSION["medicineId"][$i]; ?></td>
+                          <td><?php echo $row["name"]; ?></td>
+                          <td><?php echo $row["vendorName"]; ?></td>
                           <td>
-                            <input type="date" class="form-control-sm" style="width: 150px;" name="mfgDateMed1" required>
-                          </td>
-                          <td>
-                            <input type="date" class="form-control-sm" style="width: 150px;" name="expDateMed1" required>
-                          </td>
-                          <td><input onchange="calPrice(this.value,1)" type="number" class="form-control-sm" style="width: 70px;" name="qtyMed1" value="1" min=1 required></td>
-                          <td>
-                            <input type="number" class="form-control-sm" style="width: 80px;" name="rPriceMed1" required>
+                            <input type="month" class="form-control-sm" name="mfgDateMed<?php echo $i; ?>" required>
                           </td>
                           <td>
-                            <input type="number" class="form-control-sm" style="width: 80px;" name="sPriceMed1" required>
+                            <input type="month" class="form-control-sm" name="expDateMed<?php echo $i; ?>" required>
+                          </td>
+                          <td><input type="number" class="form-control-sm" style="width: 70px;" name="qtyMed<?php echo $i; ?>" value="1" min=1 required></td>
+                          <td>
+                            <input type="number" class="form-control-sm" style="width: 80px;" name="rPriceMed<?php echo $i; ?>" required>
+                          </td>
+                          <td>
+                            <input type="number" class="form-control-sm" style="width: 80px;" name="sPriceMed<?php echo $i; ?>" required>
                           </td>
                           <td>  
-                            <button type="button" class="btn btn-danger btn-sm" onclick="deleteMed('8456')"><i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick='deleteMed("<?php echo $_SESSION["medicineId"][$i]; ?>")'><i class="bi bi-trash"></i></button>
                           </td>                         
                         </tr>
-                        
+                        <?php
+                          $i++;  }
+                        ?>
                       </tbody>
                     </table>
                 </div>
@@ -128,6 +200,10 @@
 
           </div>
 
+          <?php 
+              }
+          ?>
+
           
               <div class="card">
                 <div class="card-body">
@@ -136,7 +212,7 @@
                     ?>
                     <div class="alert alert-success alert-dismissible fade show col-md-8 col-lg-6 text-center mx-auto" style="margin-top: 20px;" role="alert">
                         <i class="bi bi-check-circle me-1"></i>
-                        Medicine details saved successfully
+                        Medicine details has been saved successfully
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     <?php } ?>
@@ -210,29 +286,39 @@
                       </thead>
                       <tbody id="tbody">
                       <?php 
-                          $sql="SELECT medicine.medicine_id,medicine.name,medicine.category,medicine.vendor,medicine.rack,sum(medicine_stock.quantity) as avlQuantity from medicine LEFT JOIN medicine_stock on medicine.medicine_id=medicine_stock.medicine_id GROUP BY medicine.medicine_id";
+                          $sql="SELECT medicine.medicine_id,medicine.name,medicine.category,medicine.vendor_id,medicine.rack,sum(medicine_stock.quantity) as avlQuantity from medicine LEFT JOIN medicine_stock on medicine.medicine_id=medicine_stock.medicine_id GROUP BY medicine.medicine_id";
                           $result = $conn->query($sql);
-                          $i=1;
+                          $i=0;
                           while($row = $result->fetch_assoc()){
-                            $sql2 ="SELECT name FROM vendor WHERE vendor_id=$row["vendor"]";
-                            $result2 = $conn->query($sql2);
+                            $sql2 ="SELECT name FROM vendor WHERE vendor_id='".$row["vendor_id"]."'";
+                            $result2 = $conn->query($sql2);                            
                             $row2 = $result2->fetch_assoc();
                        ?>
                         <tr class="align-middle">
-                          <th scope="row"><?php echo $i; ?></th>
-                          <td><?php echo $row["medicine_id"]; ?></td>
-                          <td><?php echo $row["name"]; ?></td>
-                          <td><?php echo $row["category"]; ?></td>
-                          <td><?php $row2["name"]; ?></td>
-                          <td><?php if($row["avlQuantity"]=="" || $row["avlQuantity"]=="0"){ echo "0";} else{ echo $row["avlQuantity"];} ?></td>
-                          <td><?php echo $row["rack"]; ?></td> 
+                          <th scope="row"><?php echo $i+1; ?></th>
+                          <td><?php echo $medicineId[$i]=$row["medicine_id"]; ?></td>
+                          <td><?php echo $medicineName[$i]=$row["name"]; ?></td>
+                          <td><?php echo $medicineCategory[$i]=$row["category"]; ?></td>
+                          <td><?php echo $medicineVendor[$i]=$row2["name"]; ?></td>
+                          <td>
+                            <?php if($row["avlQuantity"]==null || $row["avlQuantity"]=="0"){ 
+                              $medicineAvlQuantity[$i]=0;
+                              echo $medicineAvlQuantity[$i];
+                            } 
+                            else{ 
+                              $medicineAvlQuantity[$i]=$row["avlQuantity"];
+                              echo $medicineAvlQuantity[$i];
+                            } 
+                            ?>
+                          </td>
+                          <td><?php echo $medicineRack[$i]=$row["rack"]; ?></td> 
                           <td>
                               <form method="POST" action="medicine.php">
                                   <button type="submit" class="btn btn-warning btn-sm" name="add" value="<?php echo $row["medicine_id"]; ?>">ADD</button>
                               </form>
                           </td>                         
                         </tr>
-                        <?php } ?>
+                        <?php $i++;} ?>
                       </tbody>
                     </table>
                 </div>
@@ -245,7 +331,7 @@
     
   </main><!-- End #main -->
 
-  <form method="POST" action="#" id="deleteForm">
+  <form method="POST" action="medicine.php" id="deleteForm">
     <input type="hidden" name="delete" id="delete">
   </form>
 
@@ -257,37 +343,81 @@
     }
   </script>
 
-  <!-- Script for Auto Price Calculate -->
-  <script>
-    var price=[10,20,30,40];
-    var itemPrice=[10,20,30,40];
-
-    function calPrice(qty,n){
-      var product = qty*price[n-1];
-      itemPrice[n-1] = product;
-      var i=0,sum=0;
-      while(itemPrice[i]!=null){
-        sum+=itemPrice[i];
-        i++;
-      }
-      document.getElementById("med"+n).innerHTML=product+"/-";
-      document.getElementById("total").innerHTML="Total (Rs): "+sum+"/-";
-    }
-
-  </script>
-
   <!-- Script for filtering medicine -->
   <script>
 
-    <?php 
-        //$sql = "SELECT medicine.medicine_id,medicine.name,medicine.category,medicine.vendor,medicine.rack,sum(medicine_stock.quantity) as avlQuantity from medicine LEFT JOIN medicine_stock on medicine.medicine_id=medicine_stock.medicine_id GROUP BY medicine.medicine_id";
-    ?>
-    var medicineId = ["65445","432","987"];
-    var medicineName = ["kooParacetamol 650","kgdParacetamol 650","hParacetamol 650"];
-    var category = ["Painkiller","Painkiller","Painkiller"];
-    var vendor = ["Alkem","Alkem","Alkem"];
-    var avlQty = [10,10,10];
-    var rackNo = ["R5","R5","R5"];
+    var medicineId = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineId[$j].'"';
+          if(isset($medicineId[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var medicineName = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineName[$j].'"';
+          if(isset($medicineName[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var category = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineCategory[$j].'"';
+          if(isset($medicineCategory[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var vendor = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineVendor[$j].'"';
+          if(isset($medicineVendor[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var avlQty = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo $medicineAvlQuantity[$j];
+          if(isset($medicineAvlQuantity[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
+    var rackNo = [
+      <?php 
+        $j=0;
+        while($j<$i){
+          echo '"'.$medicineRack[$j].'"';
+          if(isset($medicineRack[$j+1])){
+            echo ",";
+          } 
+          $j++;
+        } 
+      ?>
+    ];
 
     function tableContents(query,j){
       var body="";

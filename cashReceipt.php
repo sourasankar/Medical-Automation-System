@@ -32,6 +32,40 @@
       $i++;
     }
   }
+  else if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["generate"])){
+
+    $i = $_SESSION["j"];
+
+    //prepare and bind
+    $stmt = $conn->prepare("INSERT INTO sales(invoice_id,date_time,total_amount) VALUES (?,?,?)");
+    $stmt->bind_param("sss",$invoiceId,$invoiceDateTime,$totalAmount);
+
+    $stmt2 = $conn->prepare("INSERT INTO sold_medicine(invoice_id,medicine_id,quantity,price) VALUES (?,?,?,?)");
+    $stmt2->bind_param("siss",$soldInvoiceId,$soldMedicineId,$soldMedicineQuantity,$soldMedicinePrice);
+
+    $j=0;
+    $invoiceId = $soldInvoiceId = date("Ymdhis");
+    $invoiceDateTime =date("Y-m-d h:i:s");
+    $sum=0;
+    while($j<$i){
+      //data from FORM
+      $receiptMedicineId[$j] = $soldMedicineId = $_POST["medicineId".$j];
+      $receiptMedicineQty[$j] = $soldMedicineQuantity = $_POST["med".$j];
+      $receiptMedicinePrice[$j] = $soldMedicinePrice = $_POST["soldMedicinePrice".$j];
+      $stmt2->execute();     
+      $sum = $sum + ($soldMedicinePrice*$soldMedicineQuantity);
+
+      $j++;
+    }
+    $counter = $j;
+    unset($_SESSION["j"]);
+    unset($_SESSION["medicineBatchNo"]);
+    
+      $totalAmount = $sum;
+      $stmt->execute(); 
+
+    $success = "success";
+  }
 
 ?>
 
@@ -64,21 +98,30 @@
 
       <div class="row">
         <div class="col-12">
-
-          <!-- <div class="card">
+          <?php
+              if(isset($success)){
+          ?>
+          <div class="card">
             <div class="card-body" >
               <h5 class="card-title">Invoice</h5>
                 <div id="printReceipt">
                     <div style="display: flex;justify-content: space-evenly;" class="row"> 
                         <fieldset style="all: revert; font-weight: 600;width: fit-content;" class="col-6">
                             <legend style="all: revert;">Cash Receipt:</legend>
-                            Receipt No: 54854525515615<br>
-                            Date & Time: 20-Nov-2021 13:45:47<br><br>
+                            Receipt No: <?php echo $invoiceId; ?><br>
+                            Date & Time: <?php echo date_format(date_create($invoiceDateTime),"d-M-Y h:i:s"); ?><br><br>
                             <u>Med #Qty @Price</u><br>
-                            Paracetamol 650 #2 @120/-<br>
-                            Paracetamol 650 #2 @120/-<br>
-                            Paracetamol 650 #2 @120/-<br><br>
-                            Total Price: 360/-<br>	                                    
+                            <?php 
+                              $k=0;
+                              while($k<$counter){
+                                $sql = "SELECT name FROM medicine WHERE medicine_id=".$receiptMedicineId[$k];
+                                $result = $conn->query($sql);                            
+                                $row = $result->fetch_assoc();
+                                echo $row["name"]." #".$receiptMedicineQty[$k]." @".$receiptMedicinePrice[$k]."/-<br>";
+                                $k++;
+                              }
+                            ?>
+                            <br>Total Price: <?php echo $totalAmount;?>/-<br>	                                    
                         </fieldset>                      
                     </div>
                 </div>
@@ -88,7 +131,11 @@
             
               </div>
 
-          </div> -->
+          </div>
+          <?php 
+              }
+          ?>
+          
           <?php
               if (isset($_SESSION["j"]) && $_SESSION["j"]!=0){
           ?>
@@ -131,6 +178,8 @@
                           <th scope="row"><?php echo $i+1; ?></th>
                           <td><?php echo $row["batch_no"]; ?></td>
                           <td><?php echo $row["medicine_id"]; ?></td>
+                          <input type="hidden" name="medicineId<?php echo $i; ?>" value="<?php echo $row["medicine_id"]; ?>">
+                          <input type="hidden" name="soldMedicinePrice<?php echo $i; ?>" value="<?php echo $row["selling_price"]; ?>">
                           <td><?php echo $row2["name"]; ?></td>
                           <td><?php echo $row3["name"]; ?></td>
                           <td><?php echo date_format(date_create($row["exp"]),"M-Y"); ?></td>

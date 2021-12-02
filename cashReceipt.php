@@ -270,7 +270,7 @@
                       </thead>
                       <tbody id="tbody">
                         <?php 
-                          $sql="SELECT * FROM medicine_stock WHERE exp>CURDATE()+INTERVAL 1 MONTH";
+                          $sql="SELECT * FROM medicine_stock WHERE quantity!='0' AND exp>CURDATE()+INTERVAL 1 MONTH";
                           $result = $conn->query($sql);
                           $i=0;
                           while($row = $result->fetch_assoc()){

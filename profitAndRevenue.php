@@ -106,7 +106,7 @@
                           <i class="bi bi-graph-up-arrow"></i>
                         </div>
                         <div class="ps-3">
-                          <h6><?php echo (int)(($totalSold/$totalPurchased)*100); ?>%</h6>
+                          <h6><?php echo (int)(($totalSold/$totalPurchased)*100)-100; ?>%</h6>
                         </div>
                       </div>
 
